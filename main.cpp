@@ -71,6 +71,7 @@ int main(int argc, char* argv[])
   }
 
   char* temp = new char[screensize];
+  char* temp2 = new char[screensize];
 
     // draw.. format BGR
   memset(fbp, 0x00, screensize);
@@ -83,48 +84,54 @@ int main(int argc, char* argv[])
       setColor(i,j,rand(),temp);
     }
   }
-
+memcpy(temp2,temp,screensize);
 // ? RGB
 
 //unsigned int x = 100;
 //unsigned int y = 100;
+
+  char* a = fbp;
+  char* b = temp;
+  char* c = temp2;
   while (1){
 
-    memcpy(fbp,temp,screensize);
+
     for (unsigned int i = 0; i < var_info.xres;i++){
       for (unsigned int j = 0; j < var_info.yres;j++){
         int count = 0;
         for ( int l = -1; l <= 1;l++){
           for ( int k = -1; k <= 1;k++){
-            if (l != 0 || k !=0){
-              if ( (getColor(i + l,j + k,fbp) & 0x000000ff ) > 128){
+            if ((l != 0 || k !=0)){
+              if ( (getColor((i + l) % var_info.xres,(j + k) % var_info.yres,c) & 0x000000ff ) > 128){
                 count ++;
               }
             }
           }
         }
 
-        if ( (getColor(i,j,fbp) & 0x000000ff ) > 128){
+        if ( (getColor(i,j,c) & 0x000000ff ) > 128){
           if (count < 2){
-            setColor(i,j,0x00000000,temp);
+            setColor(i,j,0x00000000,b);
           }else if (count > 3 ){
-            setColor(i,j,0x00000000,temp);
+            setColor(i,j,0x00000000,b);
           }else{
-            setColor(i,j,0x000000ff,temp);
+            setColor(i,j,0x000000ff,b);
           }
         }else if (count == 3){
-          setColor(i,j,0x000000ff,temp);
+          setColor(i,j,0x000000ff,b);
         }else{
-          setColor(i,j,0x00000000, temp);
+          setColor(i,j,0x00000000, b);
         }
       }
     }
 
 
-    memcpy(fbp,temp,screensize);
+    memcpy(a,b,screensize);
+    memcpy(c,b,screensize);
 }
 
   delete temp;
+  delete temp2;
   munmap(fbp, screensize);
   // close file
   close(fbfd);
